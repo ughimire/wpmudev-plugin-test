@@ -49,6 +49,27 @@ class Posts_Maintenance extends Base {
 	private $option_name = 'wpmudev_posts_maintenance_types';
 
 	/**
+	 * Page assets.
+	 *
+	 * @var array
+	 */
+	private $page_scripts = array();
+
+	/**
+	 * Assets version.
+	 *
+	 * @var string
+	 */
+	private $assets_version = '';
+
+	/**
+	 * Unique DOM id.
+	 *
+	 * @var string
+	 */
+	private $unique_id = '';
+
+	/**
 	 * Initializes the page.
 	 *
 	 * @return void
@@ -59,9 +80,12 @@ class Posts_Maintenance extends Base {
 
 		add_action( 'admin_menu', array( $this, 'register_admin_page' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'wp_ajax_wpmudev_scan_posts', array( $this, 'ajax_scan_posts' ) );
 		add_action( 'wpmudev_daily_posts_maintenance', array( $this, 'scan_posts_cron' ) );
 		add_action( 'admin_init', array( $this, 'schedule_daily_maintenance' ) );
+
+		// Asset data.
+		$this->assets_version = ! empty( $this->script_data( 'version' ) ) ? $this->script_data( 'version' ) : WPMUDEV_PLUGINTEST_VERSION;
+		$this->unique_id      = "wpmudev_plugintest_posts_maint_wrap-{$this->assets_version}";
 	}
 
 	/**
@@ -97,7 +121,51 @@ class Posts_Maintenance extends Base {
 	 * @return void
 	 */
 	public function prepare_assets() {
-		// Assets will be enqueued inline for simplicity.
+		if ( ! is_array( $this->page_scripts ) ) {
+			$this->page_scripts = array();
+		}
+
+		$handle       = 'wpmudev_plugintest_postsmaint';
+		$src          = WPMUDEV_PLUGINTEST_ASSETS_URL . '/js/postsmaintenance.min.js';
+		$style_src    = WPMUDEV_PLUGINTEST_ASSETS_URL . '/css/postsmaintenance.min.css';
+		$dependencies = ! empty( $this->script_data( 'dependencies' ) )
+			? $this->script_data( 'dependencies' )
+			: array(
+				'react',
+				'wp-element',
+				'wp-i18n',
+				'wp-is-shallow-equal',
+				'wp-polyfill',
+			);
+
+		$post_types = get_option( $this->option_name, array( 'post', 'page' ) );
+		$available  = get_post_types( array( 'public' => true ), 'objects' );
+		$available_types = array();
+		foreach ( $available as $slug => $obj ) {
+			$available_types[] = array(
+				'slug'  => $slug,
+				'label' => $obj->label,
+			);
+		}
+
+		$this->page_scripts[ $handle ] = array(
+			'src'       => $src,
+			'style_src' => $style_src,
+			'deps'      => $dependencies,
+			'ver'       => $this->assets_version,
+			'strategy'  => true,
+			'localize'  => array(
+				'restUrl'          => rest_url(),
+				'dom_element_id'   => $this->unique_id,
+				'restEndpointScan' => 'wpmudev/v1/posts-maintenance/scan',
+				'restEndpointStatus' => 'wpmudev/v1/posts-maintenance/status',
+				'nonce'            => wp_create_nonce( 'wp_rest' ),
+				'lastScan'         => get_option( 'wpmudev_posts_maintenance_last_scan', '' ),
+				'savedPostTypes'   => array_values( $post_types ),
+				'availableTypes'   => $available_types,
+				'defaultBatch'     => 50,
+			),
+		);
 	}
 
 	/**
@@ -111,7 +179,27 @@ class Posts_Maintenance extends Base {
 			return;
 		}
 
-		wp_enqueue_script( 'jquery' );
+		if ( ! empty( $this->page_scripts ) ) {
+			foreach ( $this->page_scripts as $handle => $page_script ) {
+				wp_register_script(
+					$handle,
+					$page_script['src'],
+					$page_script['deps'],
+					$page_script['ver'],
+					$page_script['strategy']
+				);
+
+				if ( ! empty( $page_script['localize'] ) ) {
+					wp_localize_script( $handle, 'wpmudevPostsMaint', $page_script['localize'] );
+				}
+
+				wp_enqueue_script( $handle );
+
+				if ( ! empty( $page_script['style_src'] ) ) {
+					wp_enqueue_style( $handle, $page_script['style_src'], array(), $this->assets_version );
+				}
+			}
+		}
 	}
 
 	/**
@@ -120,141 +208,7 @@ class Posts_Maintenance extends Base {
 	 * @return void
 	 */
 	protected function view() {
-		$post_types = get_option( $this->option_name, array( 'post', 'page' ) );
-		$last_scan  = get_option( 'wpmudev_posts_maintenance_last_scan', '' );
-		?>
-		<div class="wrap">
-			<h1><?php echo esc_html( $this->page_title ); ?></h1>
-
-			<div class="sui-box">
-				<div class="sui-box-header">
-					<h2 class="sui-box-title"><?php esc_html_e( 'Scan Posts', 'wpmudev-plugin-test' ); ?></h2>
-				</div>
-				<div class="sui-box-body">
-					<p><?php esc_html_e( 'This tool will scan all public posts and pages, updating the last scan timestamp for each post.', 'wpmudev-plugin-test' ); ?></p>
-
-					<div class="sui-box-settings-row">
-						<label for="post_types">
-							<strong><?php esc_html_e( 'Post Types to Scan:', 'wpmudev-plugin-test' ); ?></strong>
-						</label>
-						<?php
-						$available_types = get_post_types( array( 'public' => true ), 'objects' );
-						foreach ( $available_types as $type ) {
-							$checked = in_array( $type->name, $post_types, true ) ? 'checked' : '';
-							?>
-							<label style="display: block; margin: 5px 0;">
-								<input type="checkbox" name="post_types[]" value="<?php echo esc_attr( $type->name ); ?>" <?php echo esc_attr( $checked ); ?>>
-								<?php echo esc_html( $type->label ); ?> (<?php echo esc_html( $type->name ); ?>)
-							</label>
-							<?php
-						}
-						?>
-					</div>
-
-					<?php if ( $last_scan ) : ?>
-						<div class="sui-box-settings-row">
-							<p>
-								<strong><?php esc_html_e( 'Last Scan:', 'wpmudev-plugin-test' ); ?></strong>
-								<?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $last_scan ) ) ); ?>
-							</p>
-						</div>
-					<?php endif; ?>
-
-					<div id="scan-progress" style="display: none; margin: 20px 0;">
-						<div class="sui-progress">
-							<div class="sui-progress-bar">
-								<span class="sui-progress-bar-value" style="width: 0%"></span>
-							</div>
-							<span class="sui-progress-text">0%</span>
-						</div>
-						<p id="scan-status"></p>
-					</div>
-				</div>
-				<div class="sui-box-footer">
-					<div class="sui-actions-right">
-						<button type="button" id="scan-posts-btn" class="sui-button sui-button-blue">
-							<?php esc_html_e( 'Scan Posts', 'wpmudev-plugin-test' ); ?>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<script type="text/javascript">
-		jQuery(document).ready(function($) {
-			$('#scan-posts-btn').on('click', function() {
-				var $btn = $(this);
-				var $progress = $('#scan-progress');
-				var $status = $('#scan-status');
-				var postTypes = [];
-
-				$('input[name="post_types[]"]:checked').each(function() {
-					postTypes.push($(this).val());
-				});
-
-				if (postTypes.length === 0) {
-					alert('<?php echo esc_js( __( 'Please select at least one post type.', 'wpmudev-plugin-test' ) ); ?>');
-					return;
-				}
-
-				$btn.prop('disabled', true);
-				$progress.show();
-				$status.text('<?php echo esc_js( __( 'Starting scan...', 'wpmudev-plugin-test' ) ); ?>');
-
-				scanPosts(postTypes, 0, 0);
-			});
-
-			function scanPosts(postTypes, offset, totalProcessed) {
-				var $progress = $('#scan-progress');
-				var $status = $('#scan-status');
-				var $progressBar = $progress.find('.sui-progress-bar-value');
-				var $progressText = $progress.find('.sui-progress-text');
-
-				$.ajax({
-					url: ajaxurl,
-					type: 'POST',
-					data: {
-						action: 'wpmudev_scan_posts',
-						post_types: postTypes,
-						offset: offset,
-						nonce: '<?php echo esc_js( wp_create_nonce( 'wpmudev_scan_posts' ) ); ?>'
-					},
-					success: function(response) {
-						if (response.success) {
-							var processed = totalProcessed + response.data.processed;
-							var total = response.data.total;
-							var percentage = total > 0 ? Math.round((processed / total) * 100) : 0;
-
-							$progressBar.css('width', percentage + '%');
-							$progressText.text(percentage + '%');
-							$status.text(response.data.message);
-
-							if (response.data.completed) {
-								$status.text('<?php echo esc_js( __( 'Scan completed successfully!', 'wpmudev-plugin-test' ) ); ?>');
-								$('#scan-posts-btn').prop('disabled', false);
-								setTimeout(function() {
-									location.reload();
-								}, 2000);
-							} else {
-								// Continue scanning.
-								setTimeout(function() {
-									scanPosts(postTypes, response.data.next_offset, processed);
-								}, 100);
-							}
-						} else {
-							$status.text(response.data.message || '<?php echo esc_js( __( 'An error occurred.', 'wpmudev-plugin-test' ) ); ?>');
-							$('#scan-posts-btn').prop('disabled', false);
-						}
-					},
-					error: function() {
-						$status.text('<?php echo esc_js( __( 'An error occurred during the scan.', 'wpmudev-plugin-test' ) ); ?>');
-						$('#scan-posts-btn').prop('disabled', false);
-					}
-				});
-			}
-		});
-		</script>
-		<?php
+		echo '<div id="' . esc_attr( $this->unique_id ) . '" class="sui-wrap"></div>';
 	}
 
 	/**
@@ -365,6 +319,33 @@ class Posts_Maintenance extends Base {
 		if ( ! wp_next_scheduled( 'wpmudev_daily_posts_maintenance' ) ) {
 			wp_schedule_event( time(), 'daily', 'wpmudev_daily_posts_maintenance' );
 		}
+	}
+
+	/**
+	 * Gets assets data for given key.
+	 *
+	 * @param string $key Key.
+	 * @return string|array
+	 */
+	protected function script_data( string $key = '' ) {
+		$raw_script_data = $this->raw_script_data();
+
+		return ! empty( $key ) && ! empty( $raw_script_data[ $key ] ) ? $raw_script_data[ $key ] : '';
+	}
+
+	/**
+	 * Gets the script data from assets php file.
+	 *
+	 * @return array
+	 */
+	protected function raw_script_data(): array {
+		static $script_data = null;
+
+		if ( is_null( $script_data ) && file_exists( WPMUDEV_PLUGINTEST_DIR . 'assets/js/postsmaintenance.min.asset.php' ) ) {
+			$script_data = include WPMUDEV_PLUGINTEST_DIR . 'assets/js/postsmaintenance.min.asset.php';
+		}
+
+		return (array) $script_data;
 	}
 }
 

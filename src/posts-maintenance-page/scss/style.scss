@@ -1,0 +1,21 @@
+// Overwrite font path.
+$sui-font-path: '~@wpmudev/shared-ui/dist/fonts/';
+$sui-image-path: '~@wpmudev/shared-ui/dist/images/';
+
+// Share UI styles
+@import "@wpmudev/shared-ui";
+
+.post-types-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 8px 12px;
+}
+
+.sui-progress {
+	margin-top: 8px;
+}
+
+.sui-description {
+	color: #6b6b6b;
+}
+

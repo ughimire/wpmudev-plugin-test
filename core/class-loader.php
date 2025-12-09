@@ -96,5 +96,6 @@ final class Loader extends Base {
 		App\Admin_Pages\Posts_Maintenance::instance()->init();
 		App\CLI\CLI_Loader::instance()->init();
 		Endpoints\V1\Drive_API::instance()->init();
+		Endpoints\V1\Posts_Maintenance_REST::instance()->init();
 	}
 }
