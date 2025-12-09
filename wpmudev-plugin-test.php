@@ -5,7 +5,7 @@
  * Requires at least: 6.1
  * Requires PHP:      7.4
  * Version:           0.1.0
- * Author:            PLEASE ADD YOU FULL NAME HERE
+ * Author:            Umesh Ghimire
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wpmudev-plugin-test
@@ -16,12 +16,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
-// Support for site-level autoloading.
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require_once __DIR__ . '/vendor/autoload.php';
-}
-
 
 // Plugin version.
 if ( ! defined( 'WPMUDEV_PLUGINTEST_VERSION' ) ) {
@@ -52,6 +46,15 @@ if ( ! defined( 'WPMUDEV_PLUGINTEST_ASSETS_URL' ) ) {
 if ( ! defined( 'WPMUDEV_PLUGINTEST_SUI_VERSION' ) ) {
 	define( 'WPMUDEV_PLUGINTEST_SUI_VERSION', '2.12.23' );
 }
+
+// Support for site-level autoloading.
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
+// Initialize dependency manager for namespace isolation.
+require_once __DIR__ . '/core/class-dependency-manager.php';
+WPMUDEV\PluginTest\Dependency_Manager::init();
 
 
 /**

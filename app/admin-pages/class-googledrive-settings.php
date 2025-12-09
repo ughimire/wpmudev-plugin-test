@@ -143,6 +143,7 @@ class Google_Drive extends Base {
 			'strategy'  => true,
 			'localize'  => array(
 				'dom_element_id'       => $this->unique_id,
+				'restUrl'              => rest_url(),
 				'restEndpointSave'     => 'wpmudev/v1/drive/save-credentials',
 				'restEndpointAuth'     => 'wpmudev/v1/drive/auth',
 				'restEndpointFiles'    => 'wpmudev/v1/drive/files',

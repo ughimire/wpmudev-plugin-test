@@ -8,7 +8,10 @@ module.exports = function (grunt) {
 		'uninstall.php',
 		'wpmudev-plugin-test.php',
 		'!vendor/**',
+		'!node_modules/**',
 		'!**/*.map',
+		'!**/node_modules/**',
+		'!**/vendor/**',
 		'QUESTIONS.md',
 		'README.md',
 		'composer.json',
@@ -20,6 +23,7 @@ module.exports = function (grunt) {
 		'phpunit.xml.dist',
 		'src/**',
 		'tests/**',
+		'assets/**',
 	]
 
     const excludeCopyFilesPro = copyFiles

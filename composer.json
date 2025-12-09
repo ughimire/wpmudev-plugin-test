@@ -29,13 +29,27 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"Google_Task_Composer::cleanup"
+			"WPMUDEV\\PluginTest\\Google_Task_Composer::cleanup"
 		],
 		"post-update-cmd": [
-			"Google_Task_Composer::cleanup"
+			"WPMUDEV\\PluginTest\\Google_Task_Composer::cleanup"
 		]
 	},
 	"autoload": {
-        "classmap": ["core/", "app/"]
+        "classmap": ["core/", "app/"],
+		"psr-4": {
+			"WPMUDEV\\PluginTest\\": ""
+		}
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		},
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"preferred-install": "dist",
+		"sort-packages": true,
+		"optimize-autoloader": true
 	}
 }
