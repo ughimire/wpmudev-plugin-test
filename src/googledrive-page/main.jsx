@@ -36,6 +36,9 @@ const WPMUDEV_DriveTest = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadXhr, setUploadXhr] = useState(null); // Store XHR reference for cancellation
     
+    // Folder creation loading state - separate from global loading
+    const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+    
     // User feedback system - I prefer this pattern over multiple state variables
     const [notice, setNotice] = useState({ message: '', type: '' });
     
@@ -364,7 +367,7 @@ const WPMUDEV_DriveTest = () => {
             return;
         }
 
-        setIsLoading(true);
+        setIsCreatingFolder(true);
         try {
             const response = await apiFetch({
                 path: `/${window.wpmudevDriveTest.restEndpointCreate}`,
@@ -390,11 +393,11 @@ const WPMUDEV_DriveTest = () => {
             }
         } catch (error) {
             showNotice(
-                error.message || __('An error occurred while creating the folder.', 'wpmudev-plugin-test'),
+                error.message || __('Failed to create folder.', 'wpmudev-plugin-test'),
                 'error'
             );
         } finally {
-            setIsLoading(false);
+            setIsCreatingFolder(false);
         }
     };
 
@@ -666,9 +669,9 @@ const WPMUDEV_DriveTest = () => {
                                 <Button
                                     variant="secondary"
                                     onClick={handleCreateFolder}
-                                    disabled={isLoading || !folderName.trim()}
+                                    disabled={isCreatingFolder || !folderName.trim()}
                                 >
-                                    {isLoading ? <Spinner /> : __('Create Folder', 'wpmudev-plugin-test')}
+                                    {isCreatingFolder ? <Spinner /> : __('Create Folder', 'wpmudev-plugin-test')}
                                 </Button>
                             </div>
                         </div>

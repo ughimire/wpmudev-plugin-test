@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-12-10T08:27:13+00:00\n"
+"POT-Creation-Date: 2025-12-10T08:38:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 
@@ -93,180 +93,219 @@ msgstr ""
 msgid "Successfully scanned %d posts."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:190
+#: app/endpoints/v1/class-googledrive-rest.php:215
+#: app/endpoints/v1/class-posts-maintenance-rest.php:123
+msgid "You must be logged in to perform this action."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:223
+#: app/endpoints/v1/class-posts-maintenance-rest.php:131
 msgid "You do not have permission to perform this action."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:203
+#: app/endpoints/v1/class-googledrive-rest.php:268
+#, php-format
+msgid "Rate limit exceeded. Please wait %d minutes before trying again."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:305
 msgid "Client ID and Client Secret are required."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:216
-msgid "Invalid Client ID format."
+#: app/endpoints/v1/class-googledrive-rest.php:318
+msgid "Credentials contain invalid characters or formatting."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:236
+#: app/endpoints/v1/class-googledrive-rest.php:327
+msgid "Invalid Client ID format. Must be a valid Google OAuth Client ID."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:336
+msgid "Invalid Client Secret format."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:356
 #: assets/js/drivetestpage.min.js:385
 msgid "Failed to save credentials."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:247
+#: app/endpoints/v1/class-googledrive-rest.php:367
 msgid "Credentials saved successfully."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:330
+#: app/endpoints/v1/class-googledrive-rest.php:467
 msgid "Google OAuth credentials not configured. Please save your credentials first."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:371
+#: app/endpoints/v1/class-googledrive-rest.php:508
 msgid "Authorization code not received."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:380
+#: app/endpoints/v1/class-googledrive-rest.php:517
 msgid "Invalid state parameter. Please try again."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:388
+#: app/endpoints/v1/class-googledrive-rest.php:525
 msgid "Google OAuth credentials not configured."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:417
+#: app/endpoints/v1/class-googledrive-rest.php:554
 msgid "Failed to get access token: "
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:444
+#: app/endpoints/v1/class-googledrive-rest.php:581
 msgid "Google Drive API is not enabled in your Google Cloud project. Please enable it in the Google Cloud Console: https://console.developers.google.com/apis/api/drive.googleapis.com/overview"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:446
+#: app/endpoints/v1/class-googledrive-rest.php:583
 msgid "Permission denied. Please check your Google Cloud project settings and ensure the Drive API is enabled and your OAuth credentials are correct."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:448
+#: app/endpoints/v1/class-googledrive-rest.php:585
 msgid "Authentication token expired or invalid. Please re-authenticate with Google Drive."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:450
+#: app/endpoints/v1/class-googledrive-rest.php:587
 msgid "Insufficient permissions. Please ensure your OAuth credentials have the required Google Drive scopes."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:510
-#: app/endpoints/v1/class-googledrive-rest.php:596
-#: app/endpoints/v1/class-googledrive-rest.php:740
-#: app/endpoints/v1/class-googledrive-rest.php:814
+#: app/endpoints/v1/class-googledrive-rest.php:647
+#: app/endpoints/v1/class-googledrive-rest.php:739
+#: app/endpoints/v1/class-googledrive-rest.php:949
+#: app/endpoints/v1/class-googledrive-rest.php:1023
 msgid "Not authenticated with Google Drive. Please authenticate first."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:580
+#: app/endpoints/v1/class-googledrive-rest.php:717
 #, php-format
 msgid "Failed to list files: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:606
+#: app/endpoints/v1/class-googledrive-rest.php:749
 msgid "No file provided."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:616
+#: app/endpoints/v1/class-googledrive-rest.php:762
+msgid "Invalid file upload structure."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:771
 msgid "The uploaded file exceeds the upload_max_filesize directive in php.ini."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:617
+#: app/endpoints/v1/class-googledrive-rest.php:772
 msgid "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:618
+#: app/endpoints/v1/class-googledrive-rest.php:773
 msgid "The uploaded file was only partially uploaded."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:619
+#: app/endpoints/v1/class-googledrive-rest.php:774
 msgid "No file was uploaded."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:620
+#: app/endpoints/v1/class-googledrive-rest.php:775
 msgid "Missing a temporary folder."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:621
+#: app/endpoints/v1/class-googledrive-rest.php:776
 msgid "Failed to write file to disk."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:622
+#: app/endpoints/v1/class-googledrive-rest.php:777
 msgid "A PHP extension stopped the file upload."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:627
+#: app/endpoints/v1/class-googledrive-rest.php:782
 msgid "Unknown upload error."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:641
+#: app/endpoints/v1/class-googledrive-rest.php:796
 msgid "File size exceeds maximum allowed size of 100MB."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:651
+#: app/endpoints/v1/class-googledrive-rest.php:806
 msgid "File type not allowed."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:660
+#: app/endpoints/v1/class-googledrive-rest.php:815
 msgid "Uploaded file is not readable."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:679
+#: app/endpoints/v1/class-googledrive-rest.php:824
+msgid "File was not uploaded via HTTP POST."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:855
+msgid "Invalid filename after sanitization."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:864
+msgid "Filename contains unsafe characters."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:873
+msgid "Filename is too long (maximum 255 characters)."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:888
 msgid "Failed to read uploaded file."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:701
+#: app/endpoints/v1/class-googledrive-rest.php:910
 msgid "File uploaded successfully."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:724
+#: app/endpoints/v1/class-googledrive-rest.php:933
 #, php-format
 msgid "Failed to upload file: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:750
+#: app/endpoints/v1/class-googledrive-rest.php:959
 msgid "File ID is required."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:765
+#: app/endpoints/v1/class-googledrive-rest.php:974
 msgid "Cannot download folders."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:794
+#: app/endpoints/v1/class-googledrive-rest.php:1003
 #, php-format
 msgid "Failed to download file: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:825
+#: app/endpoints/v1/class-googledrive-rest.php:1034
 msgid "Folder name is required."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:841
+#: app/endpoints/v1/class-googledrive-rest.php:1050
 msgid "Folder name contains only invalid characters."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:850
+#: app/endpoints/v1/class-googledrive-rest.php:1059
 msgid "Folder name must be 255 characters or less."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:867
+#: app/endpoints/v1/class-googledrive-rest.php:1076
 msgid "Folder created successfully."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:884
+#: app/endpoints/v1/class-googledrive-rest.php:1093
 #, php-format
 msgid "Failed to create folder: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:932
+#: app/endpoints/v1/class-googledrive-rest.php:1141
 #: assets/js/drivetestpage.min.js:588
 msgid "Successfully disconnected from Google Drive."
 msgstr ""
 
-#: app/endpoints/v1/class-posts-maintenance-rest.php:156
+#: app/endpoints/v1/class-posts-maintenance-rest.php:201
 msgid "Scan already running."
 msgstr ""
 
-#: app/endpoints/v1/class-posts-maintenance-rest.php:207
+#: app/endpoints/v1/class-posts-maintenance-rest.php:273
 #: assets/js/postsmaintenance.min.js:460
 msgid "Scan started in background."
 msgstr ""

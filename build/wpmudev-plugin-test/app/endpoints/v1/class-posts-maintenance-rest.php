@@ -89,12 +89,51 @@ class Posts_Maintenance_REST extends Base {
 	}
 
 	/**
-	 * Permission check.
+	 * Permission check for Posts Maintenance endpoints.
+	 *
+	 * Posts maintenance operations can affect all posts on the site, so we need
+	 * to ensure only administrators can access these endpoints. Using the same
+	 * security approach as the Google Drive endpoints.
 	 *
 	 * @return bool
 	 */
 	public function check_permissions() {
-		return current_user_can( 'manage_options' );
+		// User must be logged in
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// User must have admin capabilities (manage_options = Administrator role)
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Additional security validation helper for sensitive operations.
+	 *
+	 * @return WP_Error|true Returns true if valid, WP_Error if not.
+	 */
+	private function validate_admin_access() {
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'not_authenticated',
+				__( 'You must be logged in to perform this action.', 'wpmudev-plugin-test' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error(
+				'insufficient_permissions',
+				__( 'You do not have permission to perform this action.', 'wpmudev-plugin-test' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -147,6 +186,12 @@ class Posts_Maintenance_REST extends Base {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function start_scan( WP_REST_Request $request ) {
+		// Additional security validation for posts maintenance
+		$security_check = $this->validate_admin_access();
+		if ( is_wp_error( $security_check ) ) {
+			return $security_check;
+		}
+
 		$state = $this->get_state();
 
 		if ( ! empty( $state['running'] ) ) {
@@ -160,18 +205,39 @@ class Posts_Maintenance_REST extends Base {
 			);
 		}
 
-		$post_types = $request->get_param( 'post_types' );
-		$batch_size = absint( $request->get_param( 'batch_size' ) );
+		// Get and validate parameters
+		$raw_post_types = $request->get_param( 'post_types' );
+		$raw_batch_size = $request->get_param( 'batch_size' );
 
-		if ( empty( $batch_size ) || $batch_size > 200 ) {
-			$batch_size = 50;
+		// Sanitize and validate batch size
+		$batch_size = absint( $raw_batch_size );
+		if ( $batch_size < 1 || $batch_size > 200 ) {
+			$batch_size = 50; // Safe default
 		}
 
-		if ( empty( $post_types ) || ! is_array( $post_types ) ) {
-			$post_types = array( 'post', 'page' );
+		// Validate and sanitize post types
+		if ( empty( $raw_post_types ) || ! is_array( $raw_post_types ) ) {
+			$post_types = array( 'post', 'page' ); // Safe defaults
+		} else {
+			$post_types = array_map( 'sanitize_text_field', $raw_post_types );
+			
+			// Additional validation: ensure post types exist and are public
+			$valid_post_types = array();
+			$available_types = get_post_types( array( 'public' => true ), 'names' );
+			
+			foreach ( $post_types as $post_type ) {
+				if ( in_array( $post_type, $available_types, true ) ) {
+					$valid_post_types[] = $post_type;
+				}
+			}
+			
+			// If no valid post types, use defaults
+			if ( empty( $valid_post_types ) ) {
+				$post_types = array( 'post', 'page' );
+			} else {
+				$post_types = $valid_post_types;
+			}
 		}
-
-		$post_types = array_map( 'sanitize_text_field', $post_types );
 		update_option( $this->option_name, $post_types );
 
 		// Count total posts to process.

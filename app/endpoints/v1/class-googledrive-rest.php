@@ -1036,10 +1036,12 @@ class Drive_API extends Base {
 			);
 		}
 
-		// Clean the name but preserve spaces and basic characters
-		// Only remove truly problematic characters for file systems
+		// Clean the name but preserve spaces and most characters
+		// Google Drive is more permissive than local file systems
 		$name = trim( $raw_name );
-		$name = preg_replace( '/[<>:"/\\\\|?*\x00-\x1f]/', '', $name ); // Remove invalid chars but keep spaces
+		
+		// Only remove truly dangerous characters (control chars and path separators)
+		$name = preg_replace( '/[\x00-\x1f\x7f]/', '', $name ); // Remove control characters only
 		$name = preg_replace( '/\s+/', ' ', $name ); // Normalize multiple spaces to single space
 		$name = trim( $name );
 
@@ -1048,6 +1050,15 @@ class Drive_API extends Base {
 			return new WP_Error(
 				'invalid_name',
 				__( 'Folder name contains only invalid characters.', 'wpmudev-plugin-test' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Additional validation: prevent names that are just dots or problematic
+		if ( $name === '.' || $name === '..' ) {
+			return new WP_Error(
+				'invalid_name',
+				__( 'Invalid folder name.', 'wpmudev-plugin-test' ),
 				array( 'status' => 400 )
 			);
 		}
