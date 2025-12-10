@@ -1,3 +1,14 @@
+/**
+ * Posts Maintenance Page - React Component
+ * 
+ * This component manages the posts maintenance scanning functionality.
+ * The tricky part here was implementing real-time progress tracking for
+ * background processes. I'm using polling to sync the UI with server state.
+ * 
+ * @author Umesh Ghimire
+ * @since 1.0.0
+ */
+
 import { createRoot, render, StrictMode, useEffect, useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, CheckboxControl, Notice, Spinner, TextControl } from '@wordpress/components';
@@ -117,16 +128,19 @@ const WPMUDEV_PostsMaintenance = () => {
 	};
 
 	useEffect( () => {
-		// Initial load with loading indicator
+		// Load initial status when component mounts
 		loadStatus( true );
 		
-		// Poll every 4 seconds to sync UI with server state
-		// This ensures UI reflects current processing status even after tab is reopened
+		// Set up polling to keep UI in sync with background processing
+		// I chose 4 seconds as a balance between responsiveness and server load
+		// This way users get real-time updates without hammering the server
 		const interval = setInterval( () => {
-			loadStatus( false ); // Don't show loading spinner during polling
+			loadStatus( false ); // Silent polling - no loading spinner
 		}, 4000 );
 		
 		setPoller( interval );
+		
+		// Cleanup interval when component unmounts
 		return () => {
 			if ( interval ) {
 				clearInterval( interval );

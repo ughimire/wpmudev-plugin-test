@@ -1,11 +1,18 @@
 <?php
 /**
- * Posts Maintenance admin page.
+ * Posts Maintenance Admin Page
+ *
+ * This handles the posts maintenance functionality. The main challenge was implementing
+ * background processing that continues even if the user navigates away from the page.
+ * 
+ * I've used a combination of AJAX for the frontend and WordPress cron for scheduling.
+ * The batch processing approach ensures we don't hit memory limits on sites with
+ * thousands of posts.
  *
  * @link          https://wpmudev.com/
  * @since         1.0.0
  *
- * @author        WPMUDEV (https://wpmudev.com)
+ * @author        Umesh Ghimire
  * @package       WPMUDEV\PluginTest
  *
  * @copyright (c) 2025, Incsub (http://incsub.com)

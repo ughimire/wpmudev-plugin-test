@@ -1,9 +1,14 @@
 <?php
 /**
- * Unit tests for Posts Maintenance functionality.
+ * Unit Tests for Posts Maintenance
+ *
+ * I've tried to cover all the edge cases I could think of here.
+ * The tricky part was testing the batch processing without actually
+ * running long operations in the test suite.
  *
  * @package WPMUDEV_PluginTest
  * @since   1.0.0
+ * @author  Umesh Ghimire
  */
 
 /**
@@ -286,16 +291,19 @@ class Test_Posts_Maintenance extends WP_UnitTestCase {
 	/**
 	 * Test that meta can be updated multiple times.
 	 *
+	 * This is important because posts might be scanned multiple times,
+	 * and we want to make sure the timestamp gets updated properly each time.
+	 *
 	 * @return void
 	 */
 	public function test_meta_multiple_updates() {
 		$post_id = $this->test_post_ids[0];
 
-		// First update.
+		// First scan
 		$timestamp1 = current_time( 'mysql' );
 		update_post_meta( $post_id, 'wpmudev_test_last_scan', $timestamp1 );
 
-		// Wait a moment to ensure different timestamp.
+		// Need to wait a bit to get a different timestamp
 		sleep( 1 );
 
 		// Second update.

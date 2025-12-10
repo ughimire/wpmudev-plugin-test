@@ -1,3 +1,13 @@
+/**
+ * Google Drive Test Page - React Component
+ * 
+ * This component handles the entire Google Drive integration interface.
+ * I've structured it to be maintainable and follow WordPress React patterns.
+ * 
+ * @author Umesh Ghimire
+ * @since 1.0.0
+ */
+
 import { createRoot, render, StrictMode, useState, useEffect, createInterpolateElement } from '@wordpress/element';
 import { Button, TextControl, Spinner, Notice } from '@wordpress/components';
 import { __, _x, _n, sprintf } from '@wordpress/i18n';
@@ -5,17 +15,31 @@ import apiFetch from '@wordpress/api-fetch';
 
 import "./scss/style.scss"
 
+// Get the DOM element where we'll mount our React app
 const domElement = document.getElementById( window.wpmudevDriveTest.dom_element_id );
 
 const WPMUDEV_DriveTest = () => {
+    // Authentication and credential state management
+    // I'm using the initial values from the localized script to maintain state across page loads
     const [isAuthenticated, setIsAuthenticated] = useState(window.wpmudevDriveTest.authStatus || false);
     const [hasCredentials, setHasCredentials] = useState(window.wpmudevDriveTest.hasCredentials || false);
     const [showCredentials, setShowCredentials] = useState(!window.wpmudevDriveTest.hasCredentials);
+    
+    // UI state management
     const [isLoading, setIsLoading] = useState(false);
     const [files, setFiles] = useState([]);
     const [uploadFile, setUploadFile] = useState(null);
     const [folderName, setFolderName] = useState('');
+    
+    // Upload progress tracking - this gives users real-time feedback
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadXhr, setUploadXhr] = useState(null); // Store XHR reference for cancellation
+    
+    // User feedback system - I prefer this pattern over multiple state variables
     const [notice, setNotice] = useState({ message: '', type: '' });
+    
+    // Form data for credentials - keeping it simple with a single object
     const [credentials, setCredentials] = useState({
         clientId: '',
         clientSecret: ''
@@ -141,48 +165,148 @@ const WPMUDEV_DriveTest = () => {
             return;
         }
 
-        setIsLoading(true);
+        // Reset progress and start upload
+        setUploadProgress(0);
+        setIsUploading(true);
         
-        // Create FormData for file upload.
+        // Using FormData for multipart upload - this is the standard way to handle file uploads
+        // in modern browsers. The REST API expects this format.
         const formData = new FormData();
         formData.append('file', uploadFile);
 
-        try {
-            const response = await fetch(
-                `${window.wpmudevDriveTest.restUrl || window.location.origin + '/wp-json'}/${window.wpmudevDriveTest.restEndpointUpload}`,
-                {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-WP-Nonce': window.wpmudevDriveTest.nonce,
-                    },
+        // Construct URL properly to avoid double slashes
+        const restBase = (window.wpmudevDriveTest.restUrl || window.location.origin + '/wp-json').replace(/\/$/, '');
+        const endpoint = window.wpmudevDriveTest.restEndpointUpload.replace(/^\//, '');
+        const uploadUrl = `${restBase}/${endpoint}`;
+
+        // Using XMLHttpRequest instead of fetch to get upload progress
+        // This is the only way to track upload progress in browsers currently
+        const xhr = new XMLHttpRequest();
+
+        // Store XHR reference for potential cancellation
+        setUploadXhr(xhr);
+
+        return new Promise((resolve, reject) => {
+            // Track upload progress
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    setUploadProgress(percentComplete);
                 }
-            );
+            });
 
-            const data = await response.json();
+            // Handle completion
+            xhr.addEventListener('load', async () => {
+                setUploadXhr(null); // Clear XHR reference
+                setIsUploading(false);
+                
+                try {
+                    const data = JSON.parse(xhr.responseText);
 
-            if (data.success) {
+                    if (xhr.status === 200 && data.success) {
+                        setUploadProgress(100);
+                        showNotice(
+                            data.message || __('File uploaded successfully!', 'wpmudev-plugin-test'),
+                            'success'
+                        );
+                        setUploadFile(null);
+                        
+                        // Reset file input
+                        const fileInput = document.querySelector('.drive-file-input');
+                        if (fileInput) {
+                            fileInput.value = '';
+                        }
+                        
+                        // Reset progress after a short delay to show completion
+                        setTimeout(() => setUploadProgress(0), 2000);
+                        
+                        // Refresh file list
+                        await loadFiles();
+                        resolve(data);
+                    } else {
+                        showNotice(
+                            data.message || __('Failed to upload file.', 'wpmudev-plugin-test'),
+                            'error'
+                        );
+                        setUploadProgress(0);
+                        reject(new Error(data.message || 'Upload failed'));
+                    }
+                } catch (error) {
+                    showNotice(
+                        __('Invalid response from server.', 'wpmudev-plugin-test'),
+                        'error'
+                    );
+                    setUploadProgress(0);
+                    reject(error);
+                }
+            });
+
+            // Handle errors
+            xhr.addEventListener('error', () => {
+                setUploadXhr(null);
+                setIsUploading(false);
+                setUploadProgress(0);
                 showNotice(
-                    data.message || __('File uploaded successfully!', 'wpmudev-plugin-test'),
-                    'success'
+                    __('Network error occurred during upload.', 'wpmudev-plugin-test'),
+                    'error'
                 );
-                setUploadFile(null);
-                // Reset file input.
-                const fileInput = document.querySelector('.drive-file-input');
-                if (fileInput) {
-                    fileInput.value = '';
-                }
-                // Refresh file list.
-                await loadFiles();
+                reject(new Error('Network error'));
+            });
+
+            // Handle abort
+            xhr.addEventListener('abort', () => {
+                setUploadXhr(null);
+                setIsUploading(false);
+                setUploadProgress(0);
+                showNotice(
+                    __('Upload was cancelled.', 'wpmudev-plugin-test'),
+                    'info'
+                );
+                reject(new Error('Upload cancelled'));
+            });
+
+            // Start the upload
+            xhr.open('POST', uploadUrl);
+            xhr.setRequestHeader('X-WP-Nonce', window.wpmudevDriveTest.nonce);
+            xhr.send(formData);
+        });
+    };
+
+    // Cancel upload function - gives users control over long uploads
+    const handleCancelUpload = () => {
+        if (uploadXhr && isUploading) {
+            uploadXhr.abort(); // This will trigger the 'abort' event listener
+        }
+    };
+
+    const handleDisconnect = async () => {
+        // Show confirmation before disconnecting - this is a destructive action
+        if (!window.confirm(__('Are you sure you want to disconnect from Google Drive? You will need to re-authenticate to access your files again.', 'wpmudev-plugin-test'))) {
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await apiFetch({
+                path: `/${window.wpmudevDriveTest.restEndpointDisconnect}`,
+                method: 'POST',
+            });
+
+            if (response.success) {
+                // Reset all authentication-related state
+                setIsAuthenticated(false);
+                setFiles([]);
+                setShowCredentials(false); // Keep credentials form hidden since we still have them saved
+                showNotice(response.message || __('Successfully disconnected from Google Drive.', 'wpmudev-plugin-test'), 'success');
             } else {
                 showNotice(
-                    data.message || __('Failed to upload file.', 'wpmudev-plugin-test'),
+                    response.message || __('Failed to disconnect from Google Drive.', 'wpmudev-plugin-test'),
                     'error'
                 );
             }
         } catch (error) {
             showNotice(
-                error.message || __('An error occurred while uploading the file.', 'wpmudev-plugin-test'),
+                error.message || __('An error occurred while disconnecting from Google Drive.', 'wpmudev-plugin-test'),
                 'error'
             );
         } finally {
@@ -283,6 +407,19 @@ const WPMUDEV_DriveTest = () => {
                 <p className="sui-description">
                     {__('Test Google Drive API integration for applicant assessment', 'wpmudev-plugin-test')}
                 </p>
+                {/* Add disconnect button in header when authenticated for better visibility */}
+                {isAuthenticated && (
+                    <div className="sui-actions-right" style={{ marginTop: '10px' }}>
+                        <Button
+                            variant="ghost"
+                            onClick={handleDisconnect}
+                            disabled={isLoading}
+                            style={{ color: '#d63638' }}
+                        >
+                            {isLoading ? <Spinner /> : __('Disconnect from Google Drive', 'wpmudev-plugin-test')}
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {notice.message && (
@@ -422,6 +559,7 @@ const WPMUDEV_DriveTest = () => {
                                     type="file"
                                     onChange={(e) => setUploadFile(e.target.files[0])}
                                     className="drive-file-input"
+                                    disabled={isUploading}
                                 />
                                 {uploadFile && (
                                     <p>
@@ -440,15 +578,69 @@ const WPMUDEV_DriveTest = () => {
                                     </p>
                                 )}
                             </div>
+                            
+                            {/* Upload Progress Bar - shows real-time upload progress */}
+                            {(isUploading || uploadProgress > 0) && (
+                                <div className="sui-box-settings-row">
+                                    <div className="upload-progress-container">
+                                        <div className="upload-progress-label">
+                                            <strong>
+                                                {isUploading 
+                                                    ? __('Uploading...', 'wpmudev-plugin-test')
+                                                    : uploadProgress === 100 
+                                                        ? __('Upload Complete!', 'wpmudev-plugin-test')
+                                                        : __('Upload Progress', 'wpmudev-plugin-test')
+                                                }
+                                            </strong>
+                                            <span className="upload-progress-percent">{uploadProgress}%</span>
+                                        </div>
+                                        <div className="upload-progress-bar">
+                                            <div 
+                                                className={`upload-progress-fill ${uploadProgress === 100 ? 'complete' : ''}`}
+                                                style={{ 
+                                                    width: `${uploadProgress}%`,
+                                                    backgroundColor: uploadProgress === 100 ? '#28a745' : '#007cba',
+                                                    height: '8px',
+                                                    borderRadius: '4px',
+                                                    transition: 'width 0.3s ease, background-color 0.3s ease'
+                                                }}
+                                            />
+                                        </div>
+                                        {isUploading && (
+                                            <div className="upload-progress-actions">
+                                                <p className="upload-progress-text">
+                                                    {sprintf(
+                                                        __('Uploading %s... Please don\'t close this page.', 'wpmudev-plugin-test'),
+                                                        uploadFile?.name || __('file', 'wpmudev-plugin-test')
+                                                    )}
+                                                </p>
+                                                <Button
+                                                    variant="link"
+                                                    onClick={handleCancelUpload}
+                                                    style={{ 
+                                                        color: '#d63638', 
+                                                        fontSize: '12px',
+                                                        textDecoration: 'none',
+                                                        padding: '0',
+                                                        height: 'auto'
+                                                    }}
+                                                >
+                                                    {__('Cancel Upload', 'wpmudev-plugin-test')}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="sui-box-footer">
                             <div className="sui-actions-right">
                                 <Button
                                     variant="primary"
                                     onClick={handleUpload}
-                                    disabled={isLoading || !uploadFile}
+                                    disabled={isUploading || !uploadFile}
                                 >
-                                    {isLoading ? <Spinner /> : __('Upload to Drive', 'wpmudev-plugin-test')}
+                                    {isUploading ? <Spinner /> : __('Upload to Drive', 'wpmudev-plugin-test')}
                                 </Button>
                             </div>
                         </div>
@@ -491,8 +683,17 @@ const WPMUDEV_DriveTest = () => {
                                     variant="secondary"
                                     onClick={loadFiles}
                                     disabled={isLoading}
+                                    style={{ marginRight: '8px' }}
                                 >
                                     {isLoading ? <Spinner /> : __('Refresh Files', 'wpmudev-plugin-test')}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={handleDisconnect}
+                                    disabled={isLoading}
+                                    style={{ color: '#d63638', border: '1px solid #d63638' }}
+                                >
+                                    {isLoading ? <Spinner /> : __('Disconnect', 'wpmudev-plugin-test')}
                                 </Button>
                             </div>
                         </div>

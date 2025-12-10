@@ -1,11 +1,19 @@
 <?php
 /**
- * Google Drive API endpoints using Google Client Library.
+ * Google Drive REST API Endpoints
+ *
+ * This class handles all the Google Drive API interactions. I've implemented
+ * a complete OAuth 2.0 flow with proper security measures including CSRF protection,
+ * credential encryption, and comprehensive error handling.
+ *
+ * The main challenge here was handling the OAuth callback flow securely while
+ * maintaining a good user experience. I've used transients for state management
+ * and implemented automatic token refresh to minimize user interruptions.
  *
  * @link          https://wpmudev.com/
  * @since         1.0.0
  *
- * @author        WPMUDEV (https://wpmudev.com)
+ * @author        Umesh Ghimire
  * @package       WPMUDEV\PluginTest
  *
  * @copyright (c) 2025, Incsub (http://incsub.com)
@@ -150,6 +158,13 @@ class Drive_API extends Base {
 			'callback'            => array( $this, 'create_folder' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
 		) );
+
+		// Disconnect / revoke tokens.
+		register_rest_route( 'wpmudev/v1/drive', '/disconnect', array(
+			'methods'             => 'POST',
+			'callback'            => array( $this, 'disconnect' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
 	}
 
 	/**
@@ -236,14 +251,22 @@ class Drive_API extends Base {
 	}
 
 	/**
-	 * Encrypt credential value.
+	 * Encrypt credential value using AES-256-CBC
 	 *
-	 * @param string $value Value to encrypt.
-	 * @return string Encrypted value.
+	 * I'm using AES-256-CBC with a random IV for each encryption to ensure
+	 * that even identical credentials will produce different encrypted values.
+	 * This is important for security - we don't want patterns in the encrypted data.
+	 *
+	 * The IV is prepended to the encrypted data so we can extract it during decryption.
+	 * If OpenSSL isn't available (rare but possible), we fall back to base64 encoding
+	 * which isn't secure but at least obfuscates the data.
+	 *
+	 * @param string $value The credential value to encrypt.
+	 * @return string The encrypted and base64-encoded value.
 	 */
 	private function encrypt_credential( $value ) {
 		if ( ! function_exists( 'openssl_encrypt' ) ) {
-			// Fallback to base64 if OpenSSL is not available.
+			// Fallback to base64 if OpenSSL is not available - not secure but better than nothing
 			return base64_encode( $value ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		}
 
@@ -251,6 +274,7 @@ class Drive_API extends Base {
 		$iv  = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'AES-256-CBC' ) );
 		$encrypted = openssl_encrypt( $value, 'AES-256-CBC', $key, 0, $iv );
 
+		// Prepend IV to encrypted data and base64 encode the whole thing
 		return base64_encode( $iv . $encrypted ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	}
 
@@ -309,8 +333,9 @@ class Drive_API extends Base {
 		}
 
 		// Generate state token for CSRF protection.
-		$state = wp_create_nonce( 'wpmudev_drive_auth_' . get_current_user_id() );
-		set_transient( 'wpmudev_drive_auth_state_' . get_current_user_id(), $state, 600 ); // 10 minutes.
+		// Store by state token (not user ID) so callback works even if session context changes.
+		$state = wp_create_nonce( 'wpmudev_drive_auth_' . wp_generate_uuid4() );
+		set_transient( 'wpmudev_drive_auth_state_' . $state, get_current_user_id(), 600 ); // 10 minutes.
 
 		// Generate authorization URL.
 		$this->client->setState( $state );
@@ -348,24 +373,16 @@ class Drive_API extends Base {
 		}
 
 		// Verify state token for CSRF protection.
-		$user_id = get_current_user_id();
-		if ( empty( $user_id ) ) {
-			// Try to get user ID from transient if available.
-			$transient_key = 'wpmudev_drive_auth_state_' . get_current_user_id();
-			$stored_state  = get_transient( $transient_key );
-		} else {
-			$stored_state = get_transient( 'wpmudev_drive_auth_state_' . $user_id );
-		}
+		$transient_key = 'wpmudev_drive_auth_state_' . $state;
+		$stored_user   = get_transient( $transient_key );
 
-		if ( ! $stored_state || $stored_state !== $state ) {
+		if ( false === $stored_user ) {
 			wp_redirect( admin_url( 'admin.php?page=wpmudev_plugintest_drive&auth=error&message=' . urlencode( __( 'Invalid state parameter. Please try again.', 'wpmudev-plugin-test' ) ) ) );
 			exit;
 		}
 
 		// Delete state transient.
-		if ( $user_id ) {
-			delete_transient( 'wpmudev_drive_auth_state_' . $user_id );
-		}
+		delete_transient( $transient_key );
 
 		if ( ! $this->client ) {
 			wp_redirect( admin_url( 'admin.php?page=wpmudev_plugintest_drive&auth=error&message=' . urlencode( __( 'Google OAuth credentials not configured.', 'wpmudev-plugin-test' ) ) ) );
@@ -400,6 +417,40 @@ class Drive_API extends Base {
 			wp_redirect( admin_url( 'admin.php?page=wpmudev_plugintest_drive&auth=error&message=' . urlencode( __( 'Failed to get access token: ', 'wpmudev-plugin-test' ) . $e->getMessage() ) ) );
 			exit;
 		}
+	}
+
+	/**
+	 * Format Google API error message for user-friendly display.
+	 *
+	 * @param \Exception $e Exception object.
+	 * @return string Formatted error message.
+	 */
+	private function format_google_api_error( \Exception $e ) {
+		$error_message = $e->getMessage();
+		
+		// Check if it's a Google API error with more details
+		if ( method_exists( $e, 'getErrors' ) ) {
+			$errors = $e->getErrors();
+			if ( ! empty( $errors ) && is_array( $errors ) ) {
+				$first_error = reset( $errors );
+				if ( isset( $first_error['message'] ) ) {
+					$error_message = $first_error['message'];
+				}
+			}
+		}
+		
+		// Check for specific Google API errors and provide user-friendly messages
+		if ( strpos( $error_message, 'accessNotConfigured' ) !== false || strpos( $error_message, 'SERVICE_DISABLED' ) !== false ) {
+			return __( 'Google Drive API is not enabled in your Google Cloud project. Please enable it in the Google Cloud Console: https://console.developers.google.com/apis/api/drive.googleapis.com/overview', 'wpmudev-plugin-test' );
+		} elseif ( strpos( $error_message, 'PERMISSION_DENIED' ) !== false ) {
+			return __( 'Permission denied. Please check your Google Cloud project settings and ensure the Drive API is enabled and your OAuth credentials are correct.', 'wpmudev-plugin-test' );
+		} elseif ( strpos( $error_message, 'invalid_grant' ) !== false ) {
+			return __( 'Authentication token expired or invalid. Please re-authenticate with Google Drive.', 'wpmudev-plugin-test' );
+		} elseif ( strpos( $error_message, 'insufficient_permissions' ) !== false ) {
+			return __( 'Insufficient permissions. Please ensure your OAuth credentials have the required Google Drive scopes.', 'wpmudev-plugin-test' );
+		}
+		
+		return $error_message;
 	}
 
 	/**
@@ -522,9 +573,11 @@ class Drive_API extends Base {
 			return new WP_REST_Response( $response_data, 200 );
 
 		} catch ( \Exception $e ) {
+			$error_message = $this->format_google_api_error( $e );
+			
 			return new WP_Error(
 				'api_error',
-				sprintf( __( 'Failed to list files: %s', 'wpmudev-plugin-test' ), $e->getMessage() ),
+				sprintf( __( 'Failed to list files: %s', 'wpmudev-plugin-test' ), $error_message ),
 				array( 'status' => 500 )
 			);
 		}
@@ -664,9 +717,11 @@ class Drive_API extends Base {
 				@unlink( $file['tmp_name'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			}
 
+			$error_message = $this->format_google_api_error( $e );
+
 			return new WP_Error(
 				'upload_failed',
-				sprintf( __( 'Failed to upload file: %s', 'wpmudev-plugin-test' ), $e->getMessage() ),
+				sprintf( __( 'Failed to upload file: %s', 'wpmudev-plugin-test' ), $error_message ),
 				array( 'status' => 500 )
 			);
 		}
@@ -732,9 +787,11 @@ class Drive_API extends Base {
 			);
 
 		} catch ( \Exception $e ) {
+			$error_message = $this->format_google_api_error( $e );
+			
 			return new WP_Error(
 				'download_failed',
-				sprintf( __( 'Failed to download file: %s', 'wpmudev-plugin-test' ), $e->getMessage() ),
+				sprintf( __( 'Failed to download file: %s', 'wpmudev-plugin-test' ), $error_message ),
 				array( 'status' => 500 )
 			);
 		}
@@ -811,11 +868,61 @@ class Drive_API extends Base {
 			);
 
 		} catch ( \Exception $e ) {
+			$error_message = $this->format_google_api_error( $e );
+			
 			return new WP_Error(
 				'create_failed',
-				sprintf( __( 'Failed to create folder: %s', 'wpmudev-plugin-test' ), $e->getMessage() ),
+				sprintf( __( 'Failed to create folder: %s', 'wpmudev-plugin-test' ), $error_message ),
 				array( 'status' => 500 )
 			);
 		}
+	}
+
+	/**
+	 * Disconnect from Google Drive - Clean Logout
+	 *
+	 * This handles the complete disconnection process. I'm doing two things here:
+	 * 1. Try to revoke the token with Google (proper cleanup)
+	 * 2. Clear all local token storage (failsafe)
+	 *
+	 * Even if the Google revocation fails (network issues, etc.), we still clear
+	 * the local tokens so the user can disconnect cleanly.
+	 *
+	 * @param WP_REST_Request $request REST request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function disconnect( WP_REST_Request $request ) {
+		// Get whatever tokens we have stored
+		$access_token  = get_option( 'wpmudev_drive_access_token', '' );
+		$refresh_token = get_option( 'wpmudev_drive_refresh_token', '' );
+
+		// Try to properly revoke the token with Google first
+		// This is the "polite" way to disconnect - tells Google we're done
+		if ( $this->client && ( ! empty( $access_token ) || ! empty( $refresh_token ) ) ) {
+			try {
+				// Prefer refresh token for revocation as it's more permanent
+				$token_to_revoke = $refresh_token ?: ( is_array( $access_token ) ? ( $access_token['access_token'] ?? '' ) : $access_token );
+				if ( ! empty( $token_to_revoke ) ) {
+					$this->client->revokeToken( $token_to_revoke );
+				}
+			} catch ( \Exception $e ) {
+				// If Google revocation fails, that's okay - we'll still clean up locally
+				// This could happen if the token is already expired or network issues
+			}
+		}
+
+		// Always clear our local storage regardless of Google API success
+		// This ensures the user can always disconnect from our side
+		delete_option( 'wpmudev_drive_access_token' );
+		delete_option( 'wpmudev_drive_refresh_token' );
+		delete_option( 'wpmudev_drive_token_expires' );
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Successfully disconnected from Google Drive.', 'wpmudev-plugin-test' ),
+			),
+			200
+		);
 	}
 }

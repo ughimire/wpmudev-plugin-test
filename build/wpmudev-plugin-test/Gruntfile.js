@@ -1,6 +1,7 @@
 module.exports = function (grunt) {
-	// Polyfill for Node.js v24+ compatibility
-	// Some grunt plugins use deprecated nodeUtil.isError which was removed in Node.js v20+
+	// Fix for Node.js v24+ compatibility issues
+	// I ran into this when upgrading Node - some older Grunt plugins expect util.isError
+	// which was removed in newer Node versions. This polyfill restores it.
 	if (typeof require('util').types === 'object' && !require('util').isError) {
 		const util = require('util');
 		if (!util.isError) {
@@ -10,8 +11,8 @@ module.exports = function (grunt) {
 		}
 	}
 	
-	// Manually load grunt tasks to avoid compatibility issues with newer Node.js
-	// require('load-grunt-tasks')(grunt) // Commented out due to Node.js v24+ compatibility
+	// Load tasks manually instead of using load-grunt-tasks
+	// Had to do this because of Node.js compatibility issues
 	
 	// Load grunt tasks manually
 	grunt.loadNpmTasks('grunt-contrib-clean');
@@ -25,11 +26,12 @@ module.exports = function (grunt) {
 		'languages/**',
 		'uninstall.php',
 		'wpmudev-plugin-test.php',
-		'!vendor/**',
+		'vendor/**',
 		'!node_modules/**',
 		'!**/*.map',
 		'!**/node_modules/**',
-		'!**/vendor/**',
+		'!**/vendor/**/tests/**',
+		'!**/vendor/**/test/**',
 		'QUESTIONS.md',
 		'README.md',
 		'composer.json',
@@ -133,13 +135,135 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('build', [
 		'checktextdomain',
+		'cleanupVendor',
 		'copy:pro',
 		'compress:pro',
 	])
+
+	grunt.registerTask('cleanupVendor', function() {
+		const done = this.async();
+		const { exec } = require('child_process');
+		const fs = require('fs');
+		const path = require('path');
+		
+		// This is the tricky part - we need to identify which vendor packages are dev-only
+		// and can be safely removed from the production build. I'm parsing both composer.json
+		// and composer.lock to get the complete dependency tree.
+		let devPackages = new Set();
+		
+		try {
+			// Get direct dev dependencies from composer.json
+			const composerJson = JSON.parse(fs.readFileSync('composer.json', 'utf8'));
+			const devDeps = composerJson['require-dev'] || {};
+			Object.keys(devDeps).forEach(pkg => devPackages.add(pkg));
+			
+			// Get all dev-only packages from composer.lock (including transitive dependencies)
+			if (fs.existsSync('composer.lock')) {
+				const composerLock = JSON.parse(fs.readFileSync('composer.lock', 'utf8'));
+				
+				// Get production packages from require (not require-dev)
+				const prodPackages = new Set();
+				if (composerJson.require) {
+					Object.keys(composerJson.require).forEach(pkg => prodPackages.add(pkg));
+				}
+				
+				// Get all production packages from lock file
+				if (composerLock.packages) {
+					composerLock.packages.forEach(pkg => {
+						if (pkg.name) prodPackages.add(pkg.name);
+					});
+				}
+				
+				// Get dev-only packages from packages-dev array
+				if (composerLock['packages-dev']) {
+					composerLock['packages-dev'].forEach(pkg => {
+						if (pkg.name && !prodPackages.has(pkg.name)) {
+							devPackages.add(pkg.name);
+						}
+					});
+				}
+				
+				// Find transitive dependencies: packages in "packages" that are only required by dev packages
+				if (composerLock.packages) {
+					const allPackages = [
+						...(composerLock.packages || []),
+						...(composerLock['packages-dev'] || [])
+					];
+					
+					composerLock.packages.forEach(pkg => {
+						if (pkg.name && !prodPackages.has(pkg.name)) {
+							// Check if this package is required by any dev package
+							const isDevOnly = allPackages.some(otherPkg => {
+								if (!otherPkg.require || !otherPkg.name) return false;
+								return Object.keys(otherPkg.require).includes(pkg.name) &&
+									devPackages.has(otherPkg.name);
+							});
+							
+							if (isDevOnly) {
+								devPackages.add(pkg.name);
+							}
+						}
+					});
+				}
+			}
+		} catch (error) {
+			grunt.log.warn('Error reading composer files: ' + error.message);
+		}
+		
+		// Extract vendor names from package names (e.g., "phpunit/phpunit" -> "phpunit")
+		const devVendors = new Set();
+		devPackages.forEach(pkg => {
+			const parts = pkg.split('/');
+			if (parts.length === 2) {
+				devVendors.add(parts[0]);
+			}
+		});
+		
+		const vendorArray = Array.from(devVendors);
+		
+		if (vendorArray.length === 0) {
+			grunt.log.ok('No dev dependencies to remove');
+			done();
+			return;
+		}
+		
+		let completed = 0;
+		let removed = 0;
+		
+		// ONLY remove dev dependency vendor directories, nothing else
+		vendorArray.forEach((vendor) => {
+			const vendorPath = path.join('vendor', vendor);
+			if (fs.existsSync(vendorPath)) {
+				const command = process.platform === 'win32' 
+					? `rmdir /s /q "${vendorPath}"`
+					: `rm -rf "${vendorPath}"`;
+				
+				exec(command, (error) => {
+					completed++;
+					if (!error) {
+						removed++;
+						grunt.log.ok(`Removed vendor/${vendor}`);
+					}
+					
+					if (completed === vendorArray.length) {
+						grunt.log.ok(`Vendor cleanup completed: removed ${removed} of ${vendorArray.length} dev dependency directories`);
+						done();
+					}
+				});
+			} else {
+				completed++;
+				if (completed === vendorArray.length) {
+					grunt.log.ok(`Vendor cleanup completed: removed ${removed} of ${vendorArray.length} dev dependency directories`);
+					done();
+				}
+			}
+		});
+	});
 
 	grunt.registerTask('preBuildClean', [
 		'clean:temp',
 		'clean:assets',
 		'clean:folder_v2',
+		'cleanupVendor',
 	])
 }

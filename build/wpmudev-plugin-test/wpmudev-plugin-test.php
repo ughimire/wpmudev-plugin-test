@@ -1,16 +1,21 @@
 <?php
 /**
  * Plugin Name:       WPMU DEV Plugin Test - Forminator Developer Position
- * Description:       A plugin focused on testing coding skills.
+ * Description:       Google Drive integration and posts maintenance toolkit for WordPress. Built with modern React components and robust backend APIs.
  * Requires at least: 6.1
  * Requires PHP:      7.4
- * Version:           0.1.0
+ * Version:           1.0.0
  * Author:            Umesh Ghimire
+ * Author URI:        https://github.com/umeshghimire
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wpmudev-plugin-test
+ * Domain Path:       /languages
+ * Network:           false
  *
- * @package           create-block
+ * @package           WPMUDEV_PluginTest
+ * @author            Umesh Ghimire <umesh@example.com>
+ * @since             1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

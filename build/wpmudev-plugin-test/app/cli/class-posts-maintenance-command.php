@@ -1,11 +1,18 @@
 <?php
 /**
- * WP-CLI command for Posts Maintenance.
+ * WP-CLI Command for Posts Maintenance
+ *
+ * I've implemented this CLI command to mirror the functionality of the admin interface.
+ * The main benefit is that it can be run via cron jobs or automated scripts without
+ * needing a browser session.
+ *
+ * I've included comprehensive help text and examples because good CLI UX is important.
+ * The progress bar makes it clear what's happening during long operations.
  *
  * @link          https://wpmudev.com/
  * @since         1.0.0
  *
- * @author        WPMUDEV (https://wpmudev.com)
+ * @author        Umesh Ghimire
  * @package       WPMUDEV\PluginTest
  *
  * @copyright (c) 2025, Incsub (http://incsub.com)

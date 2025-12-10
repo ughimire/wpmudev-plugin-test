@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPMU DEV Plugin Test - Forminator Developer Position 0.1.0\n"
+"Project-Id-Version: WPMU DEV Plugin Test - Forminator Developer Position 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpmudev-plugin-test\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-12-09T14:04:06+00:00\n"
+"POT-Creation-Date: 2025-12-10T08:22:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 
@@ -20,7 +20,7 @@ msgstr ""
 
 #. Description of the plugin
 #: wpmudev-plugin-test.php
-msgid "A plugin focused on testing coding skills."
+msgid "Google Drive integration and posts maintenance toolkit for WordPress. Built with modern React components and robust backend APIs."
 msgstr ""
 
 #. Author of the plugin
@@ -28,22 +28,27 @@ msgstr ""
 msgid "Umesh Ghimire"
 msgstr ""
 
+#. Author URI of the plugin
+#: wpmudev-plugin-test.php
+msgid "https://github.com/umeshghimire"
+msgstr ""
+
 #: app/admin-pages/class-googledrive-settings.php:81
-#: assets/js/drivetestpage.min.js:569
+#: assets/js/drivetestpage.min.js:693
 msgid "Google Drive Test"
 msgstr ""
 
-#: app/admin-pages/class-posts-maintenance.php:79
-#: assets/js/postsmaintenance.min.js:466
+#: app/admin-pages/class-posts-maintenance.php:86
+#: assets/js/postsmaintenance.min.js:480
 msgid "Posts Maintenance"
 msgstr ""
 
-#: app/admin-pages/class-posts-maintenance.php:223
+#: app/admin-pages/class-posts-maintenance.php:230
 msgid "Insufficient permissions."
 msgstr ""
 
 #. translators: %1$d: processed count, %2$d: total count.
-#: app/admin-pages/class-posts-maintenance.php:267
+#: app/admin-pages/class-posts-maintenance.php:274
 #, php-format
 msgid "Processed %1$d of %2$d posts..."
 msgstr ""
@@ -53,187 +58,208 @@ msgid "Manage posts maintenance operations."
 msgstr ""
 
 #. translators: %s: invalid post types.
-#: app/cli/class-posts-maintenance-command.php:74
+#: app/cli/class-posts-maintenance-command.php:81
 #, php-format
 msgid "Invalid post types: %s. Skipping..."
 msgstr ""
 
-#: app/cli/class-posts-maintenance-command.php:82
+#: app/cli/class-posts-maintenance-command.php:89
 msgid "No valid post types to scan."
 msgstr ""
 
 #. translators: %s: post types.
-#: app/cli/class-posts-maintenance-command.php:89
+#: app/cli/class-posts-maintenance-command.php:96
 #, php-format
 msgid "Starting scan for post types: %s"
 msgstr ""
 
-#: app/cli/class-posts-maintenance-command.php:106
+#: app/cli/class-posts-maintenance-command.php:113
 msgid "No posts found to scan."
 msgstr ""
 
 #. translators: %d: total posts.
-#: app/cli/class-posts-maintenance-command.php:113
+#: app/cli/class-posts-maintenance-command.php:120
 #, php-format
 msgid "Found %d posts to process."
 msgstr ""
 
-#: app/cli/class-posts-maintenance-command.php:120
+#: app/cli/class-posts-maintenance-command.php:127
 msgid "Scanning posts"
 msgstr ""
 
 #. translators: %d: processed count.
-#: app/cli/class-posts-maintenance-command.php:151
+#: app/cli/class-posts-maintenance-command.php:158
 #, php-format
 msgid "Successfully scanned %d posts."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:175
+#: app/endpoints/v1/class-googledrive-rest.php:190
 msgid "You do not have permission to perform this action."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:188
+#: app/endpoints/v1/class-googledrive-rest.php:203
 msgid "Client ID and Client Secret are required."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:201
+#: app/endpoints/v1/class-googledrive-rest.php:216
 msgid "Invalid Client ID format."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:221
-#: assets/js/drivetestpage.min.js:361
+#: app/endpoints/v1/class-googledrive-rest.php:236
+#: assets/js/drivetestpage.min.js:385
 msgid "Failed to save credentials."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:232
+#: app/endpoints/v1/class-googledrive-rest.php:247
 msgid "Credentials saved successfully."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:306
+#: app/endpoints/v1/class-googledrive-rest.php:330
 msgid "Google OAuth credentials not configured. Please save your credentials first."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:346
+#: app/endpoints/v1/class-googledrive-rest.php:371
 msgid "Authorization code not received."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:361
+#: app/endpoints/v1/class-googledrive-rest.php:380
 msgid "Invalid state parameter. Please try again."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:371
+#: app/endpoints/v1/class-googledrive-rest.php:388
 msgid "Google OAuth credentials not configured."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:400
+#: app/endpoints/v1/class-googledrive-rest.php:417
 msgid "Failed to get access token: "
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:459
-#: app/endpoints/v1/class-googledrive-rest.php:543
-#: app/endpoints/v1/class-googledrive-rest.php:685
-#: app/endpoints/v1/class-googledrive-rest.php:753
+#: app/endpoints/v1/class-googledrive-rest.php:444
+msgid "Google Drive API is not enabled in your Google Cloud project. Please enable it in the Google Cloud Console: https://console.developers.google.com/apis/api/drive.googleapis.com/overview"
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:446
+msgid "Permission denied. Please check your Google Cloud project settings and ensure the Drive API is enabled and your OAuth credentials are correct."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:448
+msgid "Authentication token expired or invalid. Please re-authenticate with Google Drive."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:450
+msgid "Insufficient permissions. Please ensure your OAuth credentials have the required Google Drive scopes."
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:510
+#: app/endpoints/v1/class-googledrive-rest.php:596
+#: app/endpoints/v1/class-googledrive-rest.php:740
+#: app/endpoints/v1/class-googledrive-rest.php:810
 msgid "Not authenticated with Google Drive. Please authenticate first."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:527
+#: app/endpoints/v1/class-googledrive-rest.php:580
 #, php-format
 msgid "Failed to list files: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:553
+#: app/endpoints/v1/class-googledrive-rest.php:606
 msgid "No file provided."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:563
+#: app/endpoints/v1/class-googledrive-rest.php:616
 msgid "The uploaded file exceeds the upload_max_filesize directive in php.ini."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:564
+#: app/endpoints/v1/class-googledrive-rest.php:617
 msgid "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:565
+#: app/endpoints/v1/class-googledrive-rest.php:618
 msgid "The uploaded file was only partially uploaded."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:566
+#: app/endpoints/v1/class-googledrive-rest.php:619
 msgid "No file was uploaded."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:567
+#: app/endpoints/v1/class-googledrive-rest.php:620
 msgid "Missing a temporary folder."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:568
+#: app/endpoints/v1/class-googledrive-rest.php:621
 msgid "Failed to write file to disk."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:569
+#: app/endpoints/v1/class-googledrive-rest.php:622
 msgid "A PHP extension stopped the file upload."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:574
+#: app/endpoints/v1/class-googledrive-rest.php:627
 msgid "Unknown upload error."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:588
+#: app/endpoints/v1/class-googledrive-rest.php:641
 msgid "File size exceeds maximum allowed size of 100MB."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:598
+#: app/endpoints/v1/class-googledrive-rest.php:651
 msgid "File type not allowed."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:607
+#: app/endpoints/v1/class-googledrive-rest.php:660
 msgid "Uploaded file is not readable."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:626
+#: app/endpoints/v1/class-googledrive-rest.php:679
 msgid "Failed to read uploaded file."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:648
+#: app/endpoints/v1/class-googledrive-rest.php:701
 msgid "File uploaded successfully."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:669
+#: app/endpoints/v1/class-googledrive-rest.php:724
 #, php-format
 msgid "Failed to upload file: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:695
+#: app/endpoints/v1/class-googledrive-rest.php:750
 msgid "File ID is required."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:710
+#: app/endpoints/v1/class-googledrive-rest.php:765
 msgid "Cannot download folders."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:737
+#: app/endpoints/v1/class-googledrive-rest.php:794
 #, php-format
 msgid "Failed to download file: %s"
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:763
+#: app/endpoints/v1/class-googledrive-rest.php:820
 msgid "Folder name is required."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:772
+#: app/endpoints/v1/class-googledrive-rest.php:829
 msgid "Folder name must be 255 characters or less."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:784
+#: app/endpoints/v1/class-googledrive-rest.php:841
 msgid "Folder name contains only invalid characters."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:801
+#: app/endpoints/v1/class-googledrive-rest.php:858
 msgid "Folder created successfully."
 msgstr ""
 
-#: app/endpoints/v1/class-googledrive-rest.php:816
+#: app/endpoints/v1/class-googledrive-rest.php:875
 #, php-format
 msgid "Failed to create folder: %s"
+msgstr ""
+
+#: app/endpoints/v1/class-googledrive-rest.php:923
+#: assets/js/drivetestpage.min.js:588
+msgid "Successfully disconnected from Google Drive."
 msgstr ""
 
 #: app/endpoints/v1/class-posts-maintenance-rest.php:156
@@ -241,308 +267,361 @@ msgid "Scan already running."
 msgstr ""
 
 #: app/endpoints/v1/class-posts-maintenance-rest.php:207
-#: assets/js/postsmaintenance.min.js:446
+#: assets/js/postsmaintenance.min.js:460
 msgid "Scan started in background."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: core/class-dependency-manager.php:102
+#: core/class-dependency-manager.php:108
 #, php-format
 msgid "%s requires Google API Client library. Please run: composer install"
 msgstr ""
 
 #. translators: %1$s: plugin name, %2$s: current version, %3$s: required version.
-#: core/class-dependency-manager.php:141
+#: core/class-dependency-manager.php:147
 #, php-format
 msgid "%1$s detected Google API Client version %2$s. Required: %3$s or higher."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:323
+#: assets/js/drivetestpage.min.js:347
 msgid "Successfully authenticated with Google Drive!"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:327
+#: assets/js/drivetestpage.min.js:351
 msgid "Authentication failed."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:341
+#: assets/js/drivetestpage.min.js:365
 msgid "Please enter both Client ID and Client Secret."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:359
+#: assets/js/drivetestpage.min.js:383
 msgid "Credentials saved successfully!"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:365
+#: assets/js/drivetestpage.min.js:389
 msgid "An error occurred while saving credentials."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:386
+#: assets/js/drivetestpage.min.js:410
 msgid "Failed to start authentication."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:393
+#: assets/js/drivetestpage.min.js:417
 msgid "An error occurred during authentication."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:412
+#: assets/js/drivetestpage.min.js:436
 msgid "Failed to load files."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:418
+#: assets/js/drivetestpage.min.js:442
 msgid "An error occurred while loading files."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:428
+#: assets/js/drivetestpage.min.js:452
 msgid "Please select a file to upload."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:454
+#: assets/js/drivetestpage.min.js:497
 msgid "File uploaded successfully!"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:467
+#: assets/js/drivetestpage.min.js:516
 msgid "Failed to upload file."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:473
-msgid "An error occurred while uploading the file."
+#: assets/js/drivetestpage.min.js:524
+msgid "Invalid response from server."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:508
-msgid "File downloaded successfully!"
+#: assets/js/drivetestpage.min.js:538
+msgid "Network error occurred during upload."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:511
-msgid "Failed to download file."
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:517
-msgid "An error occurred while downloading the file."
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:527
-msgid "Please enter a folder name."
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:543
-msgid "Folder created successfully!"
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:551
-msgid "Failed to create folder."
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:557
-msgid "An error occurred while creating the folder."
+#: assets/js/drivetestpage.min.js:550
+msgid "Upload was cancelled."
 msgstr ""
 
 #: assets/js/drivetestpage.min.js:572
-msgid "Test Google Drive API integration for applicant assessment"
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:585
-msgid "Set Google Drive Credentials"
+msgid "Are you sure you want to disconnect from Google Drive? You will need to re-authenticate to access your files again."
 msgstr ""
 
 #: assets/js/drivetestpage.min.js:591
-msgid "You can get Client ID from <a>Google Cloud Console</a>. Make sure to enable Google Drive API."
+msgid "Failed to disconnect from Google Drive."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:605
-msgid "Client ID"
+#: assets/js/drivetestpage.min.js:597
+msgid "An error occurred while disconnecting from Google Drive."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:614
-msgid "You can get Client Secret from <a>Google Cloud Console</a>."
+#: assets/js/drivetestpage.min.js:632
+msgid "File downloaded successfully!"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:619
-msgid "Client Secret"
+#: assets/js/drivetestpage.min.js:635
+msgid "Failed to download file."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:630
-msgid "Please use this URL <em><url/></em> in your Google API’s <strong>Authorized redirect URIs</strong> field."
+#: assets/js/drivetestpage.min.js:641
+msgid "An error occurred while downloading the file."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:645
-msgid "Required scopes for Google Drive API:"
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:659
-msgid "Save Credentials"
+#: assets/js/drivetestpage.min.js:651
+msgid "Please enter a folder name."
 msgstr ""
 
 #: assets/js/drivetestpage.min.js:667
-#: assets/js/drivetestpage.min.js:695
-msgid "Authenticate with Google Drive"
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:671
-msgid "Please authenticate with Google Drive to proceed with the test."
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:672
-msgid "This test will require the following permissions:"
-msgstr ""
-
-#: assets/js/drivetestpage.min.js:674
-msgid "View and manage Google Drive files"
+msgid "Folder created successfully!"
 msgstr ""
 
 #: assets/js/drivetestpage.min.js:675
+msgid "Failed to create folder."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:681
+msgid "An error occurred while creating the folder."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:696
+msgid "Test Google Drive API integration for applicant assessment"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:707
+msgid "Disconnect from Google Drive"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:722
+msgid "Set Google Drive Credentials"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:728
+msgid "You can get Client ID from <a>Google Cloud Console</a>. Make sure to enable Google Drive API."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:742
+msgid "Client ID"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:751
+msgid "You can get Client Secret from <a>Google Cloud Console</a>."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:756
+msgid "Client Secret"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:767
+msgid "Please use this URL <em><url/></em> in your Google API’s <strong>Authorized redirect URIs</strong> field."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:782
+msgid "Required scopes for Google Drive API:"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:796
+msgid "Save Credentials"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:804
+#: assets/js/drivetestpage.min.js:832
+msgid "Authenticate with Google Drive"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:808
+msgid "Please authenticate with Google Drive to proceed with the test."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:809
+msgid "This test will require the following permissions:"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:811
+msgid "View and manage Google Drive files"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:812
 msgid "Upload new files to Drive"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:676
+#: assets/js/drivetestpage.min.js:813
 msgid "Create folders in Drive"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:686
+#: assets/js/drivetestpage.min.js:823
 msgid "Change Credentials"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:705
+#: assets/js/drivetestpage.min.js:842
 msgid "Upload File to Drive"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:719
+#: assets/js/drivetestpage.min.js:857
 #, js-format
 msgid "<strong>Selected file:</strong> %s (%s KB)"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:739
+#: assets/js/drivetestpage.min.js:877
+msgid "Uploading..."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:879
+msgid "Upload Complete!"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:880
+msgid "Upload Progress"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:901
+#, js-format
+msgid "Uploading %s... Please don't close this page."
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:902
+msgid "file"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:916
+msgid "Cancel Upload"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:931
 msgid "Upload to Drive"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:748
+#: assets/js/drivetestpage.min.js:940
 msgid "Create New Folder"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:753
+#: assets/js/drivetestpage.min.js:945
 msgid "Folder Name"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:756
+#: assets/js/drivetestpage.min.js:948
 msgid "Enter folder name"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:767
+#: assets/js/drivetestpage.min.js:959
 msgid "Create Folder"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:776
+#: assets/js/drivetestpage.min.js:968
 msgid "Your Drive Files"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:783
+#: assets/js/drivetestpage.min.js:976
 msgid "Refresh Files"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:791
+#: assets/js/drivetestpage.min.js:984
+msgid "Disconnect"
+msgstr ""
+
+#: assets/js/drivetestpage.min.js:992
 msgid "Loading files..."
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:798
+#: assets/js/drivetestpage.min.js:999
 msgid "Folder"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:798
+#: assets/js/drivetestpage.min.js:999
 msgid "File"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:818
+#: assets/js/drivetestpage.min.js:1019
 msgid "Download"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:829
+#: assets/js/drivetestpage.min.js:1030
 msgid "View in Drive"
 msgstr ""
 
-#: assets/js/drivetestpage.min.js:839
+#: assets/js/drivetestpage.min.js:1040
 msgid "No files found in your Drive. Upload a file or create a folder to get started."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:309
+#: assets/js/postsmaintenance.min.js:320
 msgid "Never"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:377
+#: assets/js/postsmaintenance.min.js:388
 #, js-format
 msgid "Scan in progress: %1$s of %2$s posts processed (%3$s%%)"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:379
-#: assets/js/postsmaintenance.min.js:564
+#: assets/js/postsmaintenance.min.js:390
+#: assets/js/postsmaintenance.min.js:578
 msgid "unknown"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:387
+#: assets/js/postsmaintenance.min.js:398
 msgid "Scan completed successfully."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:396
-#: assets/js/postsmaintenance.min.js:399
+#: assets/js/postsmaintenance.min.js:407
+#: assets/js/postsmaintenance.min.js:410
 msgid "Failed to load status."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:429
+#: assets/js/postsmaintenance.min.js:443
 msgid "Please select at least one post type."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:444
+#: assets/js/postsmaintenance.min.js:458
 msgid "Failed to start scan."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:450
+#: assets/js/postsmaintenance.min.js:464
 msgid "An error occurred starting the scan."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:469
+#: assets/js/postsmaintenance.min.js:483
 msgid "Scan public posts/pages and update the last scan timestamp."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:485
+#: assets/js/postsmaintenance.min.js:499
 msgid "Configure Scan"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:492
+#: assets/js/postsmaintenance.min.js:506
 msgid "Refresh"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:498
+#: assets/js/postsmaintenance.min.js:512
 msgid "Post Types to Scan"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:514
+#: assets/js/postsmaintenance.min.js:528
 msgid "Batch size"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:515
+#: assets/js/postsmaintenance.min.js:529
 msgid "Number of posts to process per batch (max 200)."
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:525
+#: assets/js/postsmaintenance.min.js:539
 msgid "Last Scan:"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:530
+#: assets/js/postsmaintenance.min.js:544
 msgid "Selected:"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:532
+#: assets/js/postsmaintenance.min.js:546
 msgid "None"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:543
+#: assets/js/postsmaintenance.min.js:557
 msgid "Scan Posts"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:551
+#: assets/js/postsmaintenance.min.js:565
 msgid "Progress"
 msgstr ""
 
-#: assets/js/postsmaintenance.min.js:562
+#: assets/js/postsmaintenance.min.js:576
 #, js-format
 msgid "Processed %1$s of %2$s posts."
 msgstr ""

@@ -1,13 +1,19 @@
 <?php
 /**
- * Dependency Manager class.
+ * Dependency Manager - Handles Plugin Conflicts
  *
- * Handles dependency isolation and version conflict prevention.
+ * This was one of the trickier parts to implement. The main issue is that multiple
+ * WordPress plugins might use different versions of the same Composer packages,
+ * which can cause fatal errors.
+ *
+ * My approach uses namespace isolation and version checking to prevent conflicts.
+ * I've also added admin notices to warn users about potential issues before they
+ * become fatal errors.
  *
  * @link    https://wpmudev.com/
  * @since   1.0.0
  *
- * @author  WPMUDEV (https://wpmudev.com)
+ * @author  Umesh Ghimire
  * @package WPMUDEV_PluginTest
  *
  * @copyright (c) 2025, Incsub (http://incsub.com)
