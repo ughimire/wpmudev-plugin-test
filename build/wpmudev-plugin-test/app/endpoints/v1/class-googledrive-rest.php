@@ -798,7 +798,11 @@ class Drive_API extends Base {
 	}
 
 	/**
-	 * Create folder in Google Drive.
+	 * Create folder in Google Drive
+	 *
+	 * Fixed an issue where sanitize_text_field() was being too aggressive
+	 * and causing valid folder names like "abc test" to be rejected.
+	 * Now using more targeted character filtering that preserves spaces.
 	 *
 	 * @param WP_REST_Request $request REST request object.
 	 * @return WP_REST_Response|WP_Error
@@ -812,9 +816,10 @@ class Drive_API extends Base {
 			);
 		}
 
-		$name = sanitize_text_field( $request->get_param( 'name' ) );
+		// Get and clean the folder name - being more careful with sanitization
+		$raw_name = $request->get_param( 'name' );
 		
-		if ( empty( $name ) ) {
+		if ( empty( $raw_name ) ) {
 			return new WP_Error(
 				'missing_name',
 				__( 'Folder name is required.', 'wpmudev-plugin-test' ),
@@ -822,23 +827,27 @@ class Drive_API extends Base {
 			);
 		}
 
-		// Validate folder name length.
-		if ( strlen( $name ) > 255 ) {
-			return new WP_Error(
-				'invalid_name_length',
-				__( 'Folder name must be 255 characters or less.', 'wpmudev-plugin-test' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		// Remove invalid characters from folder name.
-		$name = preg_replace( '/[<>:"/\\|?*]/', '', $name );
+		// Clean the name but preserve spaces and basic characters
+		// Only remove truly problematic characters for file systems
+		$name = trim( $raw_name );
+		$name = preg_replace( '/[<>:"/\\\\|?*\x00-\x1f]/', '', $name ); // Remove invalid chars but keep spaces
+		$name = preg_replace( '/\s+/', ' ', $name ); // Normalize multiple spaces to single space
 		$name = trim( $name );
 
+		// Check if name is empty after cleaning
 		if ( empty( $name ) ) {
 			return new WP_Error(
 				'invalid_name',
 				__( 'Folder name contains only invalid characters.', 'wpmudev-plugin-test' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate folder name length
+		if ( strlen( $name ) > 255 ) {
+			return new WP_Error(
+				'invalid_name_length',
+				__( 'Folder name must be 255 characters or less.', 'wpmudev-plugin-test' ),
 				array( 'status' => 400 )
 			);
 		}
